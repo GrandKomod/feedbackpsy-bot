@@ -1,64 +1,61 @@
 import os
-import asyncio
 from aiogram import Bot, Dispatcher, types
 from aiogram.types import Message
+from aiogram.filters import Command
+from aiogram.utils.keyboard import ReplyKeyboardBuilder
+from aiogram import F
+import asyncio
 
-# Токен бота берём из переменной окружения
+# =======================
+# Получаем переменные окружения
+# =======================
 TOKEN = os.getenv("TOKEN")
+ADMINS = os.getenv("ADMINS")
+
 if not TOKEN:
-    print("Ошибка: переменная TOKEN не задана!")
-    exit(1)
+    raise RuntimeError("Ошибка: переменная TOKEN не задана!")
+if not ADMINS:
+    raise RuntimeError("Ошибка: переменная ADMINS не задана!")
 
-# Админ прописан напрямую
-ADMINS = [228986476]  # <- сюда твой Telegram ID
+# Преобразуем строку "12345678,87654321" в список чисел
+ADMINS = [int(admin_id.strip()) for admin_id in ADMINS.split(",")]
 
-# Создаем бот и диспетчер
+# =======================
+# Инициализация бота
+# =======================
 bot = Bot(token=TOKEN)
 dp = Dispatcher()
 
-# Словарь для хранения последних сообщений пользователей (user_id: текст)
-user_messages = {}
+# =======================
+# Простой стартовый хэндлер
+# =======================
+@dp.message(Command("start"))
+async def start_handler(message: Message):
+    await message.answer(f"Привет, {message.from_user.first_name}! Бот работает.")
 
+# =======================
+# Хэндлер только для админов
+# =======================
+@dp.message(F.from_user.id.in_(ADMINS))
+async def admin_only(message: Message):
+    await message.answer("Вы админ и можете использовать все команды!")
+
+# =======================
+# Хэндлер для всех остальных
+# =======================
 @dp.message()
-async def handle_message(message: Message):
-    user_id = message.from_user.id
+async def everyone_else(message: Message):
+    await message.answer("Эта команда доступна всем пользователям.")
 
-    # Команда для ответа от администратора
-    if message.text.startswith("/reply"):
-        if user_id not in ADMINS:
-            await message.answer("❌ У вас нет прав администратора.")
-            return
-        try:
-            # формат команды: /reply <user_id> <текст ответа>
-            _, reply_id, *reply_text = message.text.split()
-            reply_id = int(reply_id)
-            reply_text = " ".join(reply_text)
-            await bot.send_message(reply_id, f"💬 Ответ администратора: {reply_text}")
-            await message.answer(f"✅ Ответ отправлен пользователю {reply_id}")
-        except Exception as e:
-            await message.answer(f"Ошибка при отправке: {e}")
-        return
-
-    # Если пользователь написал /start
-    if message.text == "/start":
-        await message.answer("Добрый день! Напишите свой вопрос.")
-        return
-
-    # Сохраняем сообщение пользователя
-    user_messages[user_id] = message.text
-
-    # Пересылаем сообщение админам
-    for admin in ADMINS:
-        await bot.send_message(admin, f"📩 Сообщение от {user_id}:\n{message.text}")
-
-    # Ответ пользователю
-    await message.answer("Ваше сообщение отправлено администраторам!")
-
+# =======================
+# Запуск бота
+# =======================
 async def main():
-    print("Бот запущен")
-    await dp.start_polling(bot)
+    try:
+        print("Бот запускается...")
+        await dp.start_polling(bot)
+    finally:
+        await bot.session.close()
 
 if __name__ == "__main__":
     asyncio.run(main())
-
-
