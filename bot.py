@@ -76,7 +76,7 @@ async def reply_handler(message: Message):
 # =======================
 @dp.message()
 async def echo_user(message: Message):
-    await message.reply("Ваше сообщение получено, админ скоро ответит.")
+    await message.reply("Ваше сообщение получено, скоро ответим!")
 
 # =======================
 # Запуск бота
@@ -90,4 +90,5 @@ async def main():
 
 if __name__ == "__main__":
     asyncio.run(main())
+
 
