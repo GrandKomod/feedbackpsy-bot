@@ -10,14 +10,22 @@ from aiogram.types import Message
 TOKEN = os.getenv("TOKEN")
 ADMINS = os.getenv("ADMINS")
 
-# Проверка
+# =======================
+# Проверка переменных
+# =======================
+print("Значение TOKEN:", TOKEN)
+print("Значение ADMINS:", ADMINS)
+
 if not TOKEN:
-    raise RuntimeError("Ошибка: переменная TOKEN не задана!")
+    raise RuntimeError("Ошибка: переменная TOKEN не задана! Добавьте её в Environment Variables на Railway.")
 if not ADMINS:
-    raise RuntimeError("Ошибка: переменная ADMINS не задана!")
+    raise RuntimeError("Ошибка: переменная ADMINS не задана! Добавьте её в Environment Variables на Railway.")
 
 # Преобразуем строку "12345678,87654321" в список чисел
-ADMINS = [int(admin_id.strip()) for admin_id in ADMINS.split(",")]
+try:
+    ADMINS = [int(admin_id.strip()) for admin_id in ADMINS.split(",")]
+except ValueError:
+    raise RuntimeError("Ошибка: ADMINS должно быть строкой чисел через запятую, например: 12345678,87654321")
 
 # =======================
 # Инициализация бота
@@ -41,7 +49,6 @@ async def reply_handler(message: Message):
         await message.reply("❌ У вас нет прав для этой команды.")
         return
 
-    # Парсим команду
     try:
         parts = message.text.split(maxsplit=2)
         user_id = int(parts[1])
@@ -50,7 +57,6 @@ async def reply_handler(message: Message):
         await message.reply("Использование: /reply <user_id> <текст>")
         return
 
-    # Отправка сообщения пользователю
     try:
         await bot.send_message(chat_id=user_id, text=text)
         await message.reply(f"✅ Сообщение отправлено пользователю {user_id}")
