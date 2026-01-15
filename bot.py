@@ -46,7 +46,7 @@ dp = Dispatcher()
 # =======================
 @dp.message(Command("start"))
 async def start_handler(message: Message):
-    await message.answer(f"Привет, {message.from_user.first_name}! Бот работает.")
+    await message.answer(f"Добрый день, {message.from_user.first_name}! Напишите свой вопрос.")
 
 # =======================
 # Команда админа /reply <user_id> <текст>
@@ -90,3 +90,4 @@ async def main():
 
 if __name__ == "__main__":
     asyncio.run(main())
+
