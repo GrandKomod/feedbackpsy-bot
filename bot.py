@@ -5,27 +5,35 @@ from aiogram.filters import Command
 from aiogram.types import Message
 
 # =======================
-# Чтение переменных окружения
+# Проверка всех переменных окружения
 # =======================
+print("Все доступные переменные окружения:")
+for k, v in os.environ.items():
+    print(f"{k} = {v}")
+
+# Чтение переменных окружения
 TOKEN = os.getenv("TOKEN")
 ADMINS = os.getenv("ADMINS")
 
-# =======================
-# Проверка переменных
-# =======================
-print("Значение TOKEN:", TOKEN)
-print("Значение ADMINS:", ADMINS)
-
+# Проверка наличия токена и админов
 if not TOKEN:
-    raise RuntimeError("Ошибка: переменная TOKEN не задана! Добавьте её в Environment Variables на Railway.")
+    raise RuntimeError(
+        "Ошибка: переменная TOKEN не задана! Добавьте её в Environment Variables на Railway."
+    )
 if not ADMINS:
-    raise RuntimeError("Ошибка: переменная ADMINS не задана! Добавьте её в Environment Variables на Railway.")
+    raise RuntimeError(
+        "Ошибка: переменная ADMINS не задана! Добавьте её в Environment Variables на Railway."
+    )
 
 # Преобразуем строку "12345678,87654321" в список чисел
 try:
     ADMINS = [int(admin_id.strip()) for admin_id in ADMINS.split(",")]
 except ValueError:
-    raise RuntimeError("Ошибка: ADMINS должно быть строкой чисел через запятую, например: 12345678,87654321")
+    raise RuntimeError(
+        "Ошибка: ADMINS должно быть строкой чисел через запятую, например: 12345678,87654321"
+    )
+
+print("TOKEN и ADMINS успешно прочитаны из переменных окружения!")
 
 # =======================
 # Инициализация бота
